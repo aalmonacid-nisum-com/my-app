@@ -1,3 +1,5 @@
+*No se incluye la carpeta node_modules en git
+
 # my-app
 1.- Uso EXPO para crear mi proyecto<br />
 2.- Para el token uso Context Api, ya que me pareció lo más adecuado para un proyecto sencillo, versus Redux<br />
