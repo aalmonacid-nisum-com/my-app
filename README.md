@@ -1,4 +1,5 @@
 *No se incluye la carpeta node_modules en git
+*Cree dos branch, main como rama principal y DEV donde estoy haciendo las pruebas
 
 # my-app
 1.- Uso EXPO para crear mi proyecto<br />
