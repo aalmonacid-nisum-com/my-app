@@ -1,5 +1,5 @@
 # my-app
-1.- Uso EXPO para realizar mi proyecto<br />
+1.- Uso EXPO para crear mi proyecto<br />
 2.- Para el token uso Context Api, ya que me pareció lo más adecuado para un proyecto sencillo, versus Redux<br />
 3.- LOGIN:
   * Muestro mensaje de error, en caso de error de conección o usuario o login no existe, y en caso de campos obligatorios
