@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LogoutModal from '../screens/LogoutModal';
 
 export default function DetalleProductos({ route, navigation }) {
   const { productId } = route.params;
   const [product, setProduct] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (route.params?.showLogoutModal) {
+      setIsModalVisible(true);
+      navigation.setParams({ showLogoutModal: false });
+    }
+  }, [route.params]);
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -19,16 +29,34 @@ export default function DetalleProductos({ route, navigation }) {
     fetchProductDetail();
   }, [productId]);
 
+  // Función para cerrar sesión
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('authToken');
+    navigation.replace('Login');
+  };
+
+  // Ocultar el modal
+  const hideModal = () => {
+    setIsModalVisible(false);
+  };
+
   if (!product) {
     return (
       <View style={styles.container}>
-        <Text>Cargando detalles del producto...</Text>
+        <ActivityIndicator size="large" color="#00ff00" />
+        <Text style={styles.loadingText}>Cargando detalle...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <LogoutModal
+        isVisible={isModalVisible}
+        onCancel={hideModal}
+        onAccept={handleLogout}
+      />
+
       <Image source={{ uri: product.image }} style={styles.productImage} resizeMode="contain" />
       <Text style={styles.productTitle}>{product.title}</Text>
       <Text style={styles.productDescription}>{product.description}</Text>
@@ -42,7 +70,6 @@ export default function DetalleProductos({ route, navigation }) {
           {'Volver'}
         </Text>
       </TouchableOpacity>
-      
     </View>
   );
 }
@@ -73,6 +100,11 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
   },
+  loadingText: {
+    fontSize: 18,
+    marginTop: 10,
+    textAlign: 'center',
+  },
   button: {
     backgroundColor: '#58ad30',
     justifyContent: 'center',
@@ -80,14 +112,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     width: 100,
     height: 30,
-    borderRadius: 4,
     textAlign: 'center',
-    marginTop: 15
+    marginTop: 15,
   },
   buttonText: {
     fontSize: 14,
     fontWeight: 'normal',
     textTransform: 'uppercase',
     color: '#FFF',
-  },
+  }
 });

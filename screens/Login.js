@@ -7,9 +7,9 @@ export default function Login({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  // compruebo si existe token, uso AsyncStorage ya que es una aplicación sencilla y para este mini proyecto es lo mas rápido
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem('authToken');
@@ -20,14 +20,36 @@ export default function Login({ navigation }) {
     checkLoginStatus();
   }, [navigation]);
 
-  const handleLogin = async () => {
-    if (!username || !password) {
-      setErrorMessage('Ingresa tu usuario y contraseña.');
-      return;
+  const validateFields = () => {
+    let valid = true;
+
+    if (!username.trim()) {
+      setUsernameError('Ingresa tu nombre de usuario.');
+      valid = false;
+    } else if (username.trim().length < 3) {
+      setUsernameError('El nombre de usuario no es válido.');
+      valid = false;
+    } else {
+      setUsernameError('');
     }
 
+    if (!password.trim()) {
+      setPasswordError('Ingresa tu contraseña.');
+      valid = false;
+    } else if (password.trim().length < 6) {
+      setPasswordError('La contraseña no es válida.');
+      valid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    return valid;
+  };
+
+  const handleLogin = async () => {
+    if (!validateFields()) return;
+
     setLoading(true);
-    setErrorMessage('');
 
     try {
       const response = await axios.post('https://fakestoreapi.com/auth/login', {
@@ -38,14 +60,12 @@ export default function Login({ navigation }) {
       if (response.status === 200) {
         const { token } = response.data;
 
-        // Guardar el token en AsyncStorage
         await AsyncStorage.setItem('authToken', token);
 
-        // muestra portada de productos
         navigation.navigate('portadaProductos');
       }
     } catch (error) {
-      setErrorMessage('Credenciales incorrectas o error de red. Intenta de nuevo.');
+      setPasswordError('Usuario o clave no existe. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -54,25 +74,37 @@ export default function Login({ navigation }) {
   return (
     <View style={styles.container}>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre de usuario"
-        placeholderTextColor="#888"
-        value={username}
-        onChangeText={setUsername}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, usernameError && styles.inputError]}
+          placeholder="Nombre de usuario"
+          placeholderTextColor="#888"
+          value={username}
+          onChangeText={(text) => {
+            setUsername(text);
+            if (text.trim().length >= 3) setUsernameError('');
+          }}
+        />
+        {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="#888"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, passwordError && styles.inputError]}
+          placeholder="Contraseña"
+          placeholderTextColor="#888"
+          secureTextEntry
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (text.trim().length >= 6) setPasswordError('');
+          }}
+        />
+        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      </View>
 
       <TouchableOpacity
-        style={[styles.button, loading]}
+        style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleLogin}
         disabled={loading}
       >
@@ -80,8 +112,6 @@ export default function Login({ navigation }) {
           {loading ? 'Cargando...' : 'Iniciar sesión'}
         </Text>
       </TouchableOpacity>
-
-      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Todos los derechos reservados.</Text>
@@ -99,14 +129,20 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
   },
+  inputContainer: {
+    width: '80%',
+    marginBottom: 10,
+  },
   input: {
     height: 52,
     borderColor: '#a6a6a6',
     borderWidth: 1,
-    marginBottom: 20,
     paddingLeft: 8,
     borderRadius: 3,
-    width: '80%',
+    width: '100%',
+  },
+  inputError: {
+    borderColor: '#D73737',
   },
   button: {
     height: 60,
@@ -115,7 +151,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 4,
     width: '80%',
-    paddingLeft: 8
+    marginTop: 10,
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
   },
   buttonText: {
     fontSize: 16,
@@ -125,8 +164,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#D73737',
-    marginTop: 12,
     fontSize: 14,
+    marginTop: 4,
   },
   footer: {
     position: 'absolute',

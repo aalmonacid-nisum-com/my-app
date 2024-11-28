@@ -1,36 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Image, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LogoutModal from '../screens/LogoutModal';
 
-// modal de confirmacion de cierre de sesion
-const LogoutModal = ({ isVisible, onCancel, onAccept }) => (
-  <Modal
-    visible={isVisible}
-    animationType="slide"
-    transparent={true}
-    onRequestClose={onCancel}
-  >
-    <View style={styles.modalContainer}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalText}>¿Estás seguro de que deseas cerrar sesión?</Text>
-        <View style={styles.modalButtons}>
-          <Button title="Cancelar" onPress={onCancel} />
-          <Button title="Aceptar" onPress={onAccept} />
-        </View>
-      </View>
-    </View>
-  </Modal>
-);
-
-export default function PortadaProductos({ navigation }) {
+export default function PortadaProductos({ navigation, route }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [token, setToken] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Muestro productos desde la API
+  useEffect(() => {
+    if (route.params?.showLogoutModal) {
+      setIsModalVisible(true);
+      navigation.setParams({ showLogoutModal: false });
+    }
+  }, [route.params]);
+
+  // Obtener productos desde la API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -43,17 +30,21 @@ export default function PortadaProductos({ navigation }) {
       }
     };
 
-    // Obtener el token guardado
-    const getToken = async () => {
-      const storedToken = await AsyncStorage.getItem('authToken');
-      setToken(storedToken);
-    };
-
     fetchProducts();
-    getToken();
   }, []);
 
-  // Carga los productos
+  // Función para cerrar sesión
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('authToken');
+    navigation.replace('Login');
+  };
+
+  // Ocultar el modal
+  const hideModal = () => {
+    setIsModalVisible(false);
+  };
+
+  // Renderizar cada producto
   const renderProduct = ({ item }) => (
     <TouchableOpacity
       key={item.id}
@@ -66,33 +57,17 @@ export default function PortadaProductos({ navigation }) {
     </TouchableOpacity>
   );
 
-  // funcion para cerrar sesion
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem('authToken');
-    navigation.replace('Login');
-  };
-
-  // muestra la modal de confirmacion de cierre de sesion
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  // oculta la modal
-  const hideModal = () => {
-    setIsModalVisible(false);
-  };
-
-  // loading, podria ser una imagen o un custom loading mas elaborado pero para el ejemplo deje solo el texto
+  // Loading
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#00ff00" />
         <Text style={styles.loadingText}>Cargando productos...</Text>
       </View>
     );
   }
 
-  // mensaje de error que se muestra en caso de que no se puedan cargar los productos (por ejemplo cuando la url de la api no funciona)
+  // Error al cargar los productos
   if (error) {
     return (
       <View style={styles.container}>
@@ -103,22 +78,11 @@ export default function PortadaProductos({ navigation }) {
 
   return (
     <View style={styles.container}>
-
-      <TouchableOpacity
-        style={[styles.button]}
-        onPress={showModal}
-      >
-        <Text style={styles.buttonText}>
-          {'X'}
-        </Text>
-      </TouchableOpacity>
-
       <LogoutModal
         isVisible={isModalVisible}
         onCancel={hideModal}
         onAccept={handleLogout}
       />
-
       <FlatList
         data={products}
         renderItem={renderProduct}
@@ -180,44 +144,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#58ad30',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 4,
-    width: 30,
-    height: 30,
-    borderRadius: 4,
-    textAlign: 'center',
-    marginBottom: 15
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: 'normal',
-    textTransform: 'uppercase',
-    color: '#FFF',
-  },
+  }
 });
