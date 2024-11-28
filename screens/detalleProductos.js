@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoutModal from '../screens/LogoutModal';
@@ -43,7 +43,8 @@ export default function DetalleProductos({ route, navigation }) {
   if (!product) {
     return (
       <View style={styles.container}>
-        <Text>Cargando detalles del producto...</Text>
+        <ActivityIndicator size="large" color="#00ff00" />
+        <Text style={styles.loadingText}>Cargando detalle...</Text>
       </View>
     );
   }
@@ -98,6 +99,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#000',
     fontWeight: 'bold',
+  },
+  loadingText: {
+    fontSize: 18,
+    marginTop: 10,
+    textAlign: 'center',
   },
   button: {
     backgroundColor: '#58ad30',
