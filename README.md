@@ -31,8 +31,3 @@
 
   * detalleProductos.js: muestra el detalle tal como llega desde la API, agregando un botón volver y la modal de cierre de sesión
 
-# App.js
-
-
-
-
