@@ -19,18 +19,17 @@
   * Utilización de colores y logos estandar, algo simple y rápido para hacer las pruebas
 
 # Carpetas
-
-A modo general, separo el proyecto en carpetas y archivos para separar el contenido dinamico de lo "fijo" como header y rutas
-  * screen/ : Pantallas de login, productos y detalle
-  * navigation: cargo AppNavigator.js y Routes.js
+  * screen/ : Pantallas de login, LogoutModal, productos y detalle
+  * navigation: AppNavigator.js y Routes.js
   * context: manejo de token
 
 # portadaProductos
 
-  * portadaProductos.js: además de mostrar los productos desde la api, agregue un modal para que el usuario confirme que desea cerrar sesion, para esto ocupo el componente generico "Modal" de react, con dos botones: Aceptar y Cancelar.
-  * 
+  * portadaProductos.js: además de mostrar los productos desde la API, agregue un modal para que el usuario confirme que desea cerrar sesion, para esto ocupo el componente generico "Modal" de react, con dos botones: Aceptar y Cancelar.
 
-# App.js
+# detalleProductos
+
+  * detalleProductos.js: muestra el detalle tal como llega desde la API, agregando un botón volver y la modal de cierre de sesión
 
 
 
